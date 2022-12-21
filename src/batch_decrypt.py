@@ -46,4 +46,7 @@ if __name__ == '__main__':
         p.terminate()
         p.wait()
 
-    print("Done! Output files are in inputs/decrypted")
+    print("""Done! Output files are in inputs/decrypted.
+    Please use AssetStudio to extract the decrypted files to inputs/extracted.
+    Press Enter to exit...""")
+    input()
