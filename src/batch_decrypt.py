@@ -22,6 +22,10 @@ if __name__ == '__main__':
     if not os.path.exists(decrypted_path):
         os.makedirs(decrypted_path)
 
+    extracted_path = os.path.join(inputs_path, "extracted")
+    if not os.path.exists(extracted_path):
+        os.makedirs(extracted_path)
+
     encrypted_filepaths = []
     for root, folder, filenames in os.walk(JKSV_path):
         if filenames:
@@ -38,7 +42,7 @@ if __name__ == '__main__':
     for i in tqdm(range(len(encrypted_filepaths))):
         encrypted_filepath = encrypted_filepaths[i]
         p = subprocess.Popen([XOR_tool_path, encrypted_filepath], shell=False, stdout=subprocess.DEVNULL)
-        time.sleep(0.1)
+        time.sleep(0.05)
         p.terminate()
         p.wait()
 
