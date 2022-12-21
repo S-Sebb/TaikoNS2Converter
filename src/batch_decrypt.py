@@ -3,6 +3,7 @@ import os
 import time
 from pathlib import Path
 import subprocess
+from tqdm import tqdm
 
 dir_path = Path(os.path.dirname(os.path.realpath(__file__)))
 root_path = dir_path.parent.absolute()
@@ -34,11 +35,11 @@ if __name__ == '__main__':
 
     os.chdir(decrypted_path)
 
-    for encrypted_filepath in encrypted_filepaths:
-        print("Decrypting", encrypted_filepath)
-        p = subprocess.Popen([XOR_tool_path, encrypted_filepath])
+    for i in tqdm(range(len(encrypted_filepaths))):
+        encrypted_filepath = encrypted_filepaths[i]
+        p = subprocess.Popen([XOR_tool_path, encrypted_filepath], shell=False, stdout=subprocess.DEVNULL)
         time.sleep(0.1)
         p.terminate()
         p.wait()
 
-
+    print("Done! Output files are in inputs/decrypted")
