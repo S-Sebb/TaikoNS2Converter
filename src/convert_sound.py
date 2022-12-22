@@ -53,7 +53,7 @@ def convert_sound(acb_filepath, preview_filepath, song_id):
     # Save nus3bank
     nus3bank_filepath = os.path.join(find_cur_dir(), "song_" + song_id + ".nus3bank")
     save_hex(nus3bank_filepath, template_nus3bank_data)
-    return nus3bank_filepath
+    return nus3bank_filepath, has_preview
 
 
 def acb2wav(byte_filepath):

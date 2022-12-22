@@ -70,12 +70,17 @@ if __name__ == '__main__':
             fumen_filepaths.append(convert_fumen(song_fumen))
 
         current_status.set_description_str("Converting sound files...")
-        nus3bank_filepath = convert_sound(song_acb, song_preview, song_id)
+        nus3bank_filepath, has_preview = convert_sound(song_acb, song_preview, song_id)
         nus3bank_filename = os.path.basename(nus3bank_filepath)
-        dst_nu3bank_filepath = os.path.join(outputs_sound_path, nus3bank_filename)
-        if os.path.exists(dst_nu3bank_filepath):
-            os.remove(dst_nu3bank_filepath)
-        copy_file(nus3bank_filepath, dst_nu3bank_filepath)
+        if has_preview:
+            dst_nus3bank_dir = os.path.join(outputs_sound_path, "has_preview")
+        else:
+            dst_nus3bank_dir = os.path.join(outputs_sound_path, "no_preview")
+        make_dir(dst_nus3bank_dir)
+        dst_nus3bank_filepath = os.path.join(dst_nus3bank_dir, nus3bank_filename)
+        if os.path.exists(dst_nus3bank_filepath):
+            os.remove(dst_nus3bank_filepath)
+        copy_file(nus3bank_filepath, dst_nus3bank_filepath)
 
         outputs_fumen_song_path = os.path.join(outputs_fumen_path, song_id)
         make_dir(outputs_fumen_song_path)
