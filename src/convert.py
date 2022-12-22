@@ -15,11 +15,10 @@ if __name__ == '__main__':
                      "_x.bytes", "_x_1.bytes", "_x_2.bytes"]
 
     for filename in extracted_filenames:
-        if not filename.endswith(".csv"):
+        if not filename.endswith("_e.bytes"):
             continue
-
         song_dict = {}
-        song_id = filename.split(".csv")[0]
+        song_id = filename.split("_e.bytes")[0]
         if len(song_id) > 6:
             print("Invalid song ID: " + song_id)
         song_fumens = []
