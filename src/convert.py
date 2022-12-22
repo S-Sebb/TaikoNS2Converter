@@ -84,3 +84,4 @@ if __name__ == '__main__':
             copy_file(fumen_filepath, dst_fumen_filepath)
         os.chdir(root_path)
         remove_dir(temp_path)
+    input("Complete! Press Enter to exit...")
