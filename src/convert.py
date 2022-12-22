@@ -47,9 +47,14 @@ if __name__ == '__main__':
         song_dict["preview"] = song_preview
         song_dict_list.append(song_dict)
 
-    for i in tqdm(range(len(song_dict_list))):
+    t = tqdm(range(len(song_dict_list)), position=0)
+    current_song = tqdm(total=0, desc="Current song", position=1, bar_format='{desc}')
+    current_status = tqdm(total=0, desc="", position=2, bar_format='{desc}')
+    for i in t:
+        current_status.set_description_str("Initializing...")
         song_dict = song_dict_list[i]
         song_id = song_dict["id"]
+        current_song.set_description_str("Current song: " + song_id)
         song_fumens = song_dict["fumens"]
         song_acb = song_dict["acb"]
         song_preview = song_dict["preview"]
@@ -58,9 +63,12 @@ if __name__ == '__main__':
         song_temp_path = os.path.join(temp_path, song_id)
         make_dir(song_temp_path)
         os.chdir(song_temp_path)
+        current_status.set_description_str("Converting fumen files...")
         fumen_filepaths = []
         for song_fumen in song_fumens:
             fumen_filepaths.append(convert_fumen(song_fumen))
+
+        current_status.set_description_str("Converting sound files...")
         nus3bank_filepath = convert_sound(song_acb, song_preview, song_id)
         nus3bank_filename = os.path.basename(nus3bank_filepath)
         dst_nu3bank_filepath = os.path.join(outputs_sound_path, nus3bank_filename)
