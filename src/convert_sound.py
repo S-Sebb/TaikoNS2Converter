@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os.path
 import wave
+from pydub import AudioSegment, effects
 
 from utils import *
 
@@ -8,22 +9,23 @@ from utils import *
 def convert_sound(acb_filepath, preview_filepath, song_id):
     wav_filepath = acb2wav(acb_filepath)
     idsp_filepath = wav_filepath.replace(".wav", ".idsp")
-    wav2idsp(wav_filepath, idsp_filepath)
+
     template_nus3bank_data = get_nu3bank_template()
 
     has_preview = preview_filepath != ""
 
     if has_preview:
         preview_wav_filepath = acb2wav(preview_filepath)
-        preview_idsp_filepath = preview_wav_filepath.replace(".wav", ".idsp")
-        wav2idsp(preview_wav_filepath, preview_idsp_filepath)
         with wave.open(wav_filepath) as f:
-            preview_time = f.getnframes() / f.getframerate()
-        file_size = os.path.getsize(preview_idsp_filepath) + os.path.getsize(idsp_filepath)
+            preview_time = f.getnframes() / f.getframerate() + 10
+        appended_wav = AudioSegment.from_wav(wav_filepath) + AudioSegment.silent(10 * 1000)
+        appended_wav += AudioSegment.from_wav(preview_wav_filepath)
+        appended_wav.export(wav_filepath, format="wav")
     else:
         preview_time = 0
-        file_size = os.path.getsize(idsp_filepath)
-        preview_idsp_filepath = ""
+
+    wav2idsp(wav_filepath, idsp_filepath)
+    file_size = os.path.getsize(idsp_filepath)
 
     # Replace unique ID
     unique_id = abs(hash(song_id)) % 65536
@@ -41,14 +43,12 @@ def convert_sound(acb_filepath, preview_filepath, song_id):
 
     # Replace song id
     hex_song_id = str2hex(song_id)
-    while len(hex_song_id) < 16:
+    while len(hex_song_id) < 12:
         hex_song_id += "00"
-    template_nus3bank_data = template_nus3bank_data.replace(str2hex("NIJIRO"), str2hex(song_id))
+    template_nus3bank_data = template_nus3bank_data.replace(str2hex("NIJIRO"), hex_song_id)
 
     # Inject idsp
     template_nus3bank_data += open_as_hex(idsp_filepath)
-    if has_preview:
-        template_nus3bank_data += open_as_hex(preview_idsp_filepath)
 
     # Save nus3bank
     nus3bank_filepath = os.path.join(find_cur_dir(), "song_" + song_id + ".nus3bank")

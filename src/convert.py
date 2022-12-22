@@ -59,8 +59,6 @@ if __name__ == '__main__':
         song_fumens = song_dict["fumens"]
         song_acb = song_dict["acb"]
         song_preview = song_dict["preview"]
-        if not song_fumens or song_acb == "":
-            continue
 
         song_temp_path = os.path.join(temp_path, song_id)
         make_dir(song_temp_path)
