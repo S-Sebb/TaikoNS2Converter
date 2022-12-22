@@ -131,7 +131,7 @@ def hcas2wav(hcas_filepath, wav_filepath):
 
 def wav2idsp(wav_filepath, idsp_filepath):
     args = [vgaudiocli_path, "-i", wav_filepath, "-o", idsp_filepath]
-    p = subprocess.Popen(args, shell=False)
+    p = subprocess.Popen(args, shell=False, stdout=subprocess.DEVNULL)
     p.wait()
 
 

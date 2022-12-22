@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from tqdm import tqdm
 
 from convert_fumen import convert_fumen
 from convert_sound import convert_sound
@@ -19,6 +20,8 @@ if __name__ == '__main__':
 
         song_dict = {}
         song_id = filename.split(".csv")[0]
+        if len(song_id) > 6:
+            print("Invalid song ID: " + song_id)
         song_fumens = []
         for ending in fumen_endings:
             if song_id + ending in extracted_filenames:
@@ -44,15 +47,14 @@ if __name__ == '__main__':
         song_dict["preview"] = song_preview
         song_dict_list.append(song_dict)
 
-    for song_dict in song_dict_list:
+    for i in tqdm(range(len(song_dict_list))):
+        song_dict = song_dict_list[i]
         song_id = song_dict["id"]
         song_fumens = song_dict["fumens"]
         song_acb = song_dict["acb"]
         song_preview = song_dict["preview"]
         if not song_fumens or song_acb == "":
-            print("Song " + song_id + " is missing fumens or acb.")
             continue
-        print("Converting song " + song_id + "...")
         song_temp_path = os.path.join(temp_path, song_id)
         make_dir(song_temp_path)
         os.chdir(song_temp_path)
