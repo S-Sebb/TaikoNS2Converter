@@ -83,7 +83,7 @@ def remove_dir(path):
 
 def decrypt_file(filepath):
     p = subprocess.Popen([XOR_tool_path, filepath], shell=False, stdout=subprocess.DEVNULL)
-    time.sleep(0.05)
+    time.sleep(0.1)
     p.terminate()
     p.wait()
 
@@ -118,8 +118,6 @@ def init():
 def acb2hcas(acb_filepath):
     args = [acb2hcas_path, acb_filepath, "-a", ns2_key_a, "-k", ns2_key_k]
     p = subprocess.Popen(args, shell=False, stdout=subprocess.DEVNULL)
-    time.sleep(0.1)
-    p.terminate()
     p.wait()
 
 
@@ -138,7 +136,6 @@ def wav2idsp(wav_filepath, idsp_filepath):
 def copy_file(src, dst):
     if os.path.exists(dst):
         os.remove(dst)
-    time.sleep(0.05)
     if not os.path.exists(src):
         return
     if not os.path.exists(os.path.dirname(dst)):

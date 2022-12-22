@@ -22,5 +22,3 @@ if __name__ == '__main__':
 
     print("Done! Output files are in inputs/decrypted.\n"
           "Please use AssetStudio to extract the decrypted files to inputs/extracted.\n")
-    input("Press Enter to exit...")
-    exit()
