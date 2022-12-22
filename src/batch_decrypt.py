@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
-import subprocess
-import time
 
 from tqdm import tqdm
 
 from utils import *
 
 if __name__ == '__main__':
-    for path in [inputs_path, JKSV_path, decrypted_path, extracted_path]:
-        make_dir(path)
+    init_check()
 
     encrypted_filepaths = enumerate_files(JKSV_path)[0]
 
@@ -21,12 +18,9 @@ if __name__ == '__main__':
 
     for i in tqdm(range(len(encrypted_filepaths))):
         encrypted_filepath = encrypted_filepaths[i]
-        p = subprocess.Popen([XOR_tool_path, encrypted_filepath], shell=False, stdout=subprocess.DEVNULL)
-        time.sleep(0.05)
-        p.terminate()
-        p.wait()
+        decrypt_file(encrypted_filepath)
 
     print("Done! Output files are in inputs/decrypted.\n"
-          "Please use AssetStudio to extract the decrypted files to inputs/extracted.\n"
-          "Press Enter to exit...")
-    input()
+          "Please use AssetStudio to extract the decrypted files to inputs/extracted.\n")
+    input("Press Enter to exit...")
+    exit()

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-import os
 
 from convert_fumen import convert_fumen
-
+from convert_sound import convert_sound
 from utils import *
 
 if __name__ == '__main__':
+    init_check()
     extracted_filepaths, extracted_filenames = enumerate_files(extracted_path)
 
     song_dict_list = []
@@ -53,10 +53,12 @@ if __name__ == '__main__':
             print("Song " + song_id + " is missing fumens or acb.")
             continue
         print("Converting song " + song_id + "...")
-        song_temp_path = os.path.join(extracted_path, song_id)
+        song_temp_path = os.path.join(temp_path, song_id)
         make_dir(song_temp_path)
         os.chdir(song_temp_path)
         for song_fumen in song_fumens:
             convert_fumen(song_fumen)
-
-
+        convert_sound(song_acb, song_preview)
+        os.chdir(root_path)
+        remove_dir(temp_path)
+        break
