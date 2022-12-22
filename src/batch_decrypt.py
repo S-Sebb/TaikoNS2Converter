@@ -5,7 +5,7 @@ from tqdm import tqdm
 from utils import *
 
 if __name__ == '__main__':
-    init_check()
+    init()
 
     encrypted_filepaths = enumerate_files(JKSV_path)[0]
 

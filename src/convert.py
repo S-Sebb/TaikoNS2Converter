@@ -5,7 +5,7 @@ from convert_sound import convert_sound
 from utils import *
 
 if __name__ == '__main__':
-    init_check()
+    init()
     extracted_filepaths, extracted_filenames = enumerate_files(extracted_path)
 
     song_dict_list = []
@@ -56,9 +56,21 @@ if __name__ == '__main__':
         song_temp_path = os.path.join(temp_path, song_id)
         make_dir(song_temp_path)
         os.chdir(song_temp_path)
+        fumen_filepaths = []
         for song_fumen in song_fumens:
-            convert_fumen(song_fumen)
-        convert_sound(song_acb, song_preview)
-        # os.chdir(root_path)
-        # remove_dir(temp_path)
-        break
+            fumen_filepaths.append(convert_fumen(song_fumen))
+        nus3bank_filepath = convert_sound(song_acb, song_preview, song_id)
+        nus3bank_filename = os.path.basename(nus3bank_filepath)
+        dst_nu3bank_filepath = os.path.join(outputs_sound_path, nus3bank_filename)
+        if os.path.exists(dst_nu3bank_filepath):
+            os.remove(dst_nu3bank_filepath)
+        copy_file(nus3bank_filepath, dst_nu3bank_filepath)
+
+        outputs_fumen_song_path = os.path.join(outputs_fumen_path, song_id)
+        make_dir(outputs_fumen_song_path)
+        for fumen_filepath in fumen_filepaths:
+            fumen_filename = os.path.basename(fumen_filepath)
+            dst_fumen_filepath = os.path.join(outputs_fumen_song_path, fumen_filename)
+            copy_file(fumen_filepath, dst_fumen_filepath)
+        os.chdir(root_path)
+        remove_dir(temp_path)

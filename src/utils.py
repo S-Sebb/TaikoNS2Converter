@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-
+import binascii
+import json
 import os
 import shutil
+import struct
 import subprocess
 import time
 from pathlib import Path
@@ -10,6 +12,9 @@ dir_path = Path(os.path.dirname(os.path.realpath(__file__)))
 root_path = dir_path.parent.absolute()
 XOR_tool_path = os.path.join(root_path, "tools", "TNS2-XOR", "TNS2-XOR.exe")
 inputs_path = os.path.join(root_path, "inputs")
+outputs_path = os.path.join(root_path, "outputs")
+outputs_fumen_path = os.path.join(outputs_path, "fumen")
+outputs_sound_path = os.path.join(outputs_path, "sound")
 temp_path = os.path.join(root_path, "temp")
 JKSV_path = os.path.join(inputs_path, "JKSV")
 decrypted_path = os.path.join(inputs_path, "decrypted")
@@ -18,6 +23,38 @@ acb2hcas_path = os.path.join(root_path, "tools", "libcgss", "bin", "x64", "Relea
 ns2_key_a = "52539816150204134"
 ns2_key_k = "00baa8af36327ee6"
 vgmstream_path = os.path.join(root_path, "tools", "vgmstream-win", "test.exe")
+vgaudiocli_path = os.path.join(root_path, "tools", "VGAudioCli", "VGAudioCli.exe")
+
+
+def read_json(json_path):
+    with open(json_path) as f:
+        data = json.load(f)
+    return data
+
+
+def get_nu3bank_template():
+    template_data = read_json(os.path.join(dir_path, "template.json"))
+    return template_data["nus3bank_template"]
+
+
+def get_music_order_template():
+    template_data = read_json(os.path.join(dir_path, "template.json"))
+    return template_data["music_order_template"]
+
+
+def get_musicinfo_template():
+    template_data = read_json(os.path.join(dir_path, "template.json"))
+    return template_data["musicinfo_template"]
+
+
+def get_music_attribute_template():
+    template_data = read_json(os.path.join(dir_path, "template.json"))
+    return template_data["music_attribute_template"]
+
+
+def get_wordlist_template():
+    template_data = read_json(os.path.join(dir_path, "template.json"))
+    return template_data["wordlist_template"]
 
 
 def find_cur_dir():
@@ -51,7 +88,7 @@ def decrypt_file(filepath):
     p.wait()
 
 
-def init_check():
+def init():
     for path in [inputs_path, JKSV_path, decrypted_path, extracted_path, temp_path]:
         make_dir(path)
     if not os.path.exists(XOR_tool_path):
@@ -65,6 +102,17 @@ def init_check():
               acb2hcas_path)
         input("\nPress Enter to exit...")
         exit()
+    if not os.path.exists(vgmstream_path):
+        print("vgmstream-win not found.\n"
+              "Please download it from https://github.com/vgmstream/vgmstream/releases and make sure "
+              "vgmstream-win is at " +
+              vgmstream_path)
+        exit()
+    if not os.path.exists(vgaudiocli_path):
+        print("VGAudioCli not found.\n"
+              "Please download it from https://github.com/Thealexbarney/VGAudio/releases and make sure "
+              "VGAudioCli is at " +
+              vgaudiocli_path)
 
 
 def acb2hcas(acb_filepath):
@@ -77,7 +125,14 @@ def acb2hcas(acb_filepath):
 
 def hcas2wav(hcas_filepath, wav_filepath):
     args = [vgmstream_path, "-o", wav_filepath, hcas_filepath]
-    subprocess.Popen(args, shell=False, stdout=subprocess.DEVNULL)
+    p = subprocess.Popen(args, shell=False, stdout=subprocess.DEVNULL)
+    p.wait()
+
+
+def wav2idsp(wav_filepath, idsp_filepath):
+    args = [vgaudiocli_path, "-i", wav_filepath, "-o", idsp_filepath]
+    p = subprocess.Popen(args, shell=False)
+    p.wait()
 
 
 def copy_file(src, dst):
@@ -89,3 +144,26 @@ def copy_file(src, dst):
     if not os.path.exists(os.path.dirname(dst)):
         os.makedirs(os.path.dirname(dst))
     shutil.copy(src, dst)
+
+
+def open_as_hex(filepath):
+    with open(filepath, "rb") as f:
+        hex_data = binascii.hexlify(f.read()).decode("ascii")
+    return hex_data
+
+
+def save_hex(filepath, hex_data):
+    with open(filepath, "wb") as f:
+        f.write(binascii.unhexlify(hex_data))
+
+
+def str2hex(input_str):
+    output = ""
+    for char in input_str:
+        output += struct.pack('<s', bytes(char, "utf-8")).hex()
+    return output
+
+
+def int2hex(input_int, hex_len):
+    hex_data = struct.pack('<Q', input_int).hex()[:hex_len]
+    return hex_data
