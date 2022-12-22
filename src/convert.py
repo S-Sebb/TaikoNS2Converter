@@ -59,6 +59,6 @@ if __name__ == '__main__':
         for song_fumen in song_fumens:
             convert_fumen(song_fumen)
         convert_sound(song_acb, song_preview)
-        os.chdir(root_path)
-        remove_dir(temp_path)
+        # os.chdir(root_path)
+        # remove_dir(temp_path)
         break

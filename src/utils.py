@@ -14,9 +14,10 @@ temp_path = os.path.join(root_path, "temp")
 JKSV_path = os.path.join(inputs_path, "JKSV")
 decrypted_path = os.path.join(inputs_path, "decrypted")
 extracted_path = os.path.join(inputs_path, "extracted")
-acb2hcas_path = os.path.join(root_path, "tools", "libgcss", "bin", "x64", "Release", "acb2hcas.exe")
+acb2hcas_path = os.path.join(root_path, "tools", "libcgss", "bin", "x64", "Release", "acb2hcas.exe")
 ns2_key_a = "52539816150204134"
 ns2_key_k = "00baa8af36327ee6"
+vgmstream_path = os.path.join(root_path, "tools", "vgmstream-win", "test.exe")
 
 
 def find_cur_dir():
@@ -72,6 +73,11 @@ def acb2hcas(acb_filepath):
     time.sleep(0.1)
     p.terminate()
     p.wait()
+
+
+def hcas2wav(hcas_filepath, wav_filepath):
+    args = [vgmstream_path, "-o", wav_filepath, hcas_filepath]
+    subprocess.Popen(args, shell=False, stdout=subprocess.DEVNULL)
 
 
 def copy_file(src, dst):
