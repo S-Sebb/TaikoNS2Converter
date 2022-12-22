@@ -29,12 +29,13 @@ if __name__ == '__main__':
                 song_fumens.append(extracted_filepaths[idx])
         if len(song_fumens) < 12:
             song_fumens = []
+            continue
         song_acb = "SONG_" + song_id.upper() + "_acb.bytes"
         if song_acb in extracted_filenames:
             idx = extracted_filenames.index(song_acb)
             song_acb = extracted_filepaths[idx]
         else:
-            song_acb = ""
+            continue
         song_preview = "PSONG_" + song_id.upper() + "_acb.bytes"
         if song_preview in extracted_filenames:
             idx = extracted_filenames.index(song_preview)
