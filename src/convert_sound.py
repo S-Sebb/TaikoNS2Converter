@@ -40,6 +40,9 @@ def convert_sound(acb_filepath, preview_filepath, song_id):
     template_nus3bank_data = template_nus3bank_data.replace("cccccccc", file_size)
 
     # Replace song id
+    hex_song_id = str2hex(song_id)
+    while len(hex_song_id) < 16:
+        hex_song_id += "00"
     template_nus3bank_data = template_nus3bank_data.replace(str2hex("NIJIRO"), str2hex(song_id))
 
     # Inject idsp
