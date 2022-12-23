@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     song_dict_list = sorted(song_dict_list, key=lambda x: x["id"])
 
-    t = tqdm(range(len(song_dict_list)), position=0)
+    t = tqdm(range(len(song_dict_list)), position=0, leave=False)
     current_song = tqdm(total=0, desc="Current song", position=1, bar_format='{desc}')
     current_status = tqdm(total=0, desc="", position=2, bar_format='{desc}')
     for i in t:
@@ -90,4 +90,7 @@ if __name__ == '__main__':
             copy_file(fumen_filepath, dst_fumen_filepath)
         os.chdir(root_path)
         remove_dir(temp_path)
-    current_status.set_description_str("Complete")
+    t.close()
+    current_song.close()
+    current_status.close()
+    print("Complete")
