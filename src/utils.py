@@ -8,22 +8,24 @@ import subprocess
 import time
 from pathlib import Path
 
-dir_path = Path(os.path.dirname(os.path.realpath(__file__)))
-root_path = dir_path.parent.absolute()
+src_path = Path(os.path.dirname(os.path.realpath(__file__)))
+root_path = src_path.parent.absolute()
 XOR_tool_path = os.path.join(root_path, "tools", "TNS2-XOR", "TNS2-XOR.exe")
 inputs_path = os.path.join(root_path, "inputs")
 outputs_path = os.path.join(root_path, "outputs")
+tools_path = os.path.join(root_path, "tools")
 outputs_fumen_path = os.path.join(outputs_path, "fumen")
 outputs_sound_path = os.path.join(outputs_path, "sound")
+template_path = os.path.join(src_path, "template.json")
 temp_path = os.path.join(root_path, "temp")
 JKSV_path = os.path.join(inputs_path, "JKSV")
 decrypted_path = os.path.join(inputs_path, "decrypted")
 extracted_path = os.path.join(inputs_path, "extracted")
-acb2hcas_path = os.path.join(root_path, "tools", "libcgss", "bin", "x64", "Release", "acb2hcas.exe")
+acb2hcas_path = os.path.join(tools_path, "libcgss", "bin", "x64", "Release", "acb2hcas.exe")
+vgmstream_path = os.path.join(tools_path, "vgmstream-win", "test.exe")
+vgaudiocli_path = os.path.join(tools_path, "VGAudioCli", "VGAudioCli.exe")
 ns2_key_a = "52539816150204134"
 ns2_key_k = "00baa8af36327ee6"
-vgmstream_path = os.path.join(root_path, "tools", "vgmstream-win", "test.exe")
-vgaudiocli_path = os.path.join(root_path, "tools", "VGAudioCli", "VGAudioCli.exe")
 
 
 def read_json(json_path):
@@ -33,27 +35,27 @@ def read_json(json_path):
 
 
 def get_nu3bank_template():
-    template_data = read_json(os.path.join(dir_path, "template.json"))
+    template_data = read_json(template_path)
     return template_data["nus3bank_template"]
 
 
 def get_music_order_template():
-    template_data = read_json(os.path.join(dir_path, "template.json"))
+    template_data = read_json(template_path)
     return template_data["music_order_template"]
 
 
 def get_musicinfo_template():
-    template_data = read_json(os.path.join(dir_path, "template.json"))
+    template_data = read_json(template_path)
     return template_data["musicinfo_template"]
 
 
 def get_music_attribute_template():
-    template_data = read_json(os.path.join(dir_path, "template.json"))
+    template_data = read_json(template_path)
     return template_data["music_attribute_template"]
 
 
 def get_wordlist_template():
-    template_data = read_json(os.path.join(dir_path, "template.json"))
+    template_data = read_json(template_path)
     return template_data["wordlist_template"]
 
 
@@ -89,7 +91,7 @@ def decrypt_file(filepath):
 
 
 def init():
-    for path in [inputs_path, JKSV_path, decrypted_path, extracted_path, temp_path]:
+    for path in [inputs_path, outputs_path, JKSV_path, decrypted_path, extracted_path, tools_path, temp_path]:
         make_dir(path)
     if not os.path.exists(XOR_tool_path):
         print("TNS2-XOR.exe not found.\n"
@@ -107,12 +109,20 @@ def init():
               "Please download it from https://github.com/vgmstream/vgmstream/releases and make sure "
               "vgmstream-win is at " +
               vgmstream_path)
+        input("\nPress Enter to exit...")
         exit()
     if not os.path.exists(vgaudiocli_path):
         print("VGAudioCli not found.\n"
               "Please download it from https://github.com/Thealexbarney/VGAudio/releases and make sure "
               "VGAudioCli is at " +
               vgaudiocli_path)
+        input("\nPress Enter to exit...")
+        exit()
+    if not os.path.exists(template_path):
+        print("template.json not found.\n"
+              "Please re-download this repository and make sure template.json is at " + template_path)
+        input("\nPress Enter to exit...")
+        exit()
 
 
 def acb2hcas(acb_filepath):
