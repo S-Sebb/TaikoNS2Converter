@@ -12,10 +12,13 @@ src_path = Path(os.path.dirname(os.path.realpath(__file__)))
 root_path = src_path.parent.absolute()
 XOR_tool_path = os.path.join(root_path, "tools", "TNS2-XOR", "TNS2-XOR.exe")
 inputs_path = os.path.join(root_path, "inputs")
+musicinfo_path = os.path.join(inputs_path, "musicinfo")
+inputs_tja_path = os.path.join(inputs_path, "tja")
 outputs_path = os.path.join(root_path, "outputs")
 tools_path = os.path.join(root_path, "tools")
 outputs_fumen_path = os.path.join(outputs_path, "fumen")
 outputs_sound_path = os.path.join(outputs_path, "sound")
+outputs_datatable_path = os.path.join(outputs_path, "datatable")
 template_path = os.path.join(src_path, "template.json")
 temp_path = os.path.join(root_path, "temp")
 JKSV_path = os.path.join(inputs_path, "JKSV")
@@ -59,6 +62,16 @@ def get_wordlist_template():
     return template_data["wordlist_template"]
 
 
+def get_music_ai_section_template() -> str:
+    template_data = read_json(os.path.join(src_path, "template.json"))
+    return template_data["music_ai_section_template"]
+
+
+def get_musicinfo_data() -> list:
+    musicinfo_data = read_json(musicinfo_path)["items"]
+    return musicinfo_data
+
+
 def find_cur_dir():
     return os.getcwd()
 
@@ -91,7 +104,10 @@ def decrypt_file(filepath):
 
 
 def init():
-    for path in [inputs_path, outputs_path, JKSV_path, decrypted_path, extracted_path, tools_path, temp_path]:
+    for path in [temp_path, outputs_datatable_path]:
+        remove_dir(path)
+    for path in [inputs_path, inputs_tja_path, outputs_path, JKSV_path, decrypted_path, extracted_path, tools_path,
+                 temp_path, outputs_fumen_path, outputs_sound_path, outputs_datatable_path]:
         make_dir(path)
     if not os.path.exists(XOR_tool_path):
         print("TNS2-XOR.exe not found.\n"
@@ -122,6 +138,12 @@ def init():
         print("template.json not found.\n"
               "Please re-download this repository and make sure template.json is at " + template_path)
         input("\nPress Enter to exit...")
+        exit()
+    if not os.path.exists(musicinfo_path):
+        print("musicinfo file not found.\n"
+              "Please extract it from your latest musicinfo.bin and make sure the file \"musicinfo\" is at" +
+              musicinfo_path)
+        input("Press Enter to exit...")
         exit()
 
 
