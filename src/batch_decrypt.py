@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     os.chdir(decrypted_path)
 
-    for i in tqdm(range(len(encrypted_filepaths))):
+    for i in tqdm(range(len(encrypted_filepaths)), leave=False):
         encrypted_filepath = encrypted_filepaths[i]
         decrypt_file(encrypted_filepath)
 

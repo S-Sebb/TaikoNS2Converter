@@ -50,8 +50,8 @@ if __name__ == '__main__':
     song_dict_list = sorted(song_dict_list, key=lambda x: x["id"])
 
     t = tqdm(range(len(song_dict_list)), position=0, leave=False)
-    current_song = tqdm(total=0, desc="Current song", position=1, bar_format='{desc}')
-    current_status = tqdm(total=0, desc="", position=2, bar_format='{desc}')
+    current_song = tqdm(total=0, desc="Current song", position=1, bar_format='{desc}', leave=False)
+    current_status = tqdm(total=0, desc="", position=2, bar_format='{desc}', leave=False)
     for i in t:
         song_dict = song_dict_list[i]
         song_id = song_dict["id"]
@@ -60,9 +60,9 @@ if __name__ == '__main__':
         song_acb = song_dict["acb"]
         song_preview = song_dict["preview"]
 
-        song_temp_path = os.path.join(temp_path, song_id)
-        make_dir(song_temp_path)
-        os.chdir(song_temp_path)
+        temp_song_path = os.path.join(temp_path, song_id)
+        make_dir(temp_song_path)
+        os.chdir(temp_song_path)
 
         current_status.set_description_str("Converting fumen files...")
         fumen_filepaths = []
@@ -89,7 +89,8 @@ if __name__ == '__main__':
             dst_fumen_filepath = os.path.join(outputs_fumen_song_path, fumen_filename)
             copy_file(fumen_filepath, dst_fumen_filepath)
         os.chdir(root_path)
-        remove_dir(temp_path)
+        remove_dir(temp_song_path)
+    remove_dir(temp_path)
     t.close()
     current_song.close()
     current_status.close()
