@@ -126,7 +126,7 @@ def process_fumen(fumen_filepath, tja_data):
     total_balloon = 0
     note_type_count = {}
     total_renda_duration = 0
-    for j in range(1, 13):
+    for j in range(1, 14):
         note_type_count[j] = 0
     while start_pos < len(hex_data):
         note_type_start = start_pos
@@ -159,7 +159,7 @@ def process_fumen(fumen_filepath, tja_data):
             scoreinit = hex2int(hex_data[scoreinit_start:scoreinit_end])
         if note_type != 0:
             is_renda = False
-            if note_type == 10 or note_type == 12:
+            if note_type == 10 or 12 or 13:
                 if scoreinit < 300:
                     total_balloon += scoreinit
                 else:
