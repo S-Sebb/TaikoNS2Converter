@@ -103,12 +103,9 @@ if __name__ == '__main__':
 
     conversion_data = pd.read_excel(conversion_data_path, sheet_name="Sheet1").astype(str)
     tja_data_list = []
-    tja_data = {}
     for ind in conversion_data.index:
-        tja_data["song_id"] = conversion_data["SONG_ID"][ind]
-        tja_data["genre"] = conversion_data["GENRE"][ind]
-        tja_data["TITLE"] = conversion_data["TITLE"][ind]
-        tja_data["SUBTITLE"] = conversion_data["SUBTITLE"][ind]
+        tja_data = {"song_id": conversion_data["SONG_ID"][ind], "genre": conversion_data["GENRE"][ind],
+                    "TITLE": conversion_data["TITLE"][ind], "SUBTITLE": conversion_data["SUBTITLE"][ind]}
         edit_data, oni_data, hard_data, normal_data, easy_data = {}, {}, {}, {}, {}
         edit_data["LEVEL"] = conversion_data["EDIT_LEVEL"][ind]
         edit_data["COURSE"] = "Edit"
@@ -137,15 +134,16 @@ if __name__ == '__main__':
     found_tja_data_list = []
     for tja_data in tja_data_list:
         song_id = tja_data["song_id"]
-        found = False
-        for song_dict in song_dict_list:
-            if song_dict["id"] == song_id:
-                found = True
-                found_tja_data_list.append(tja_data)
-                break
-        if not found:
-            print("Song in conversion_data.xlsx not found: " + song_id)
-            continue
+        if song_id.strip() != "" and song_id != "nan":
+            found = False
+            for song_dict in song_dict_list:
+                if song_dict["id"] == song_id:
+                    found = True
+                    found_tja_data_list.append(tja_data)
+                    break
+            if not found:
+                print("Song in conversion_data.xlsx not found: " + song_id)
+                continue
     tja_data_list = found_tja_data_list
 
     musicinfo_data = get_musicinfo_data()
@@ -162,18 +160,16 @@ if __name__ == '__main__':
     current_song = tqdm(total=0, desc="Current song", position=1, bar_format='{desc}', leave=False)
     current_status = tqdm(total=0, desc="", position=2, bar_format='{desc}', leave=False)
     for i in t:
+        tja_data = tja_data_list[i]
+        song_id = tja_data["song_id"]
         song_dict = {}
         for data in song_dict_list:
-            if data["id"] == tja_data_list[i]["song_id"]:
+            if data["id"] == song_id:
                 song_dict = data
                 break
-        song_id = song_dict["id"]
-        tja_data = {}
-        for data in tja_data_list:
-            if data["song_id"] == song_id:
-                tja_data = data
         unique_id = available_unique_ids.pop(0)
         retry = 1
+        current_song.set_description_str("Current song: " + song_id)
         while retry > 0:
             if retry != 1:
                 if retry < 5:
@@ -181,52 +177,56 @@ if __name__ == '__main__':
                 else:
                     print("Too many retries for " + song_id + ", skipping...")
                     break
-            current_song.set_description_str("Current song: " + song_id)
-            song_fumens = song_dict["fumens"]
-            song_acb = song_dict["acb"]
-            song_preview = song_dict["preview"]
+            try:
+                song_fumens = song_dict["fumens"]
+                song_acb = song_dict["acb"]
+                song_preview = song_dict["preview"]
 
-            temp_song_path = os.path.join(temp_path, song_id)
-            make_dir(temp_song_path)
-            os.chdir(temp_song_path)
+                temp_song_path = os.path.join(temp_path, song_id)
+                make_dir(temp_song_path)
+                os.chdir(temp_song_path)
 
-            current_status.set_description_str("Converting fumen files...")
-            fumen_filepaths = []
-            for song_fumen in song_fumens:
-                fumen_filepaths.append(convert_fumen(song_fumen))
+                current_status.set_description_str("Converting fumen files...")
+                fumen_filepaths = []
+                for song_fumen in song_fumens:
+                    fumen_filepaths.append(convert_fumen(song_fumen))
 
-            current_status.set_description_str("Converting sound files...")
-            nus3bank_filepath, duration = convert_sound(song_acb, song_preview, song_id)
-            nus3bank_filename = os.path.basename(nus3bank_filepath)
-            dst_nus3bank_filepath = os.path.join(outputs_sound_path, nus3bank_filename)
-            if os.path.exists(dst_nus3bank_filepath):
-                os.remove(dst_nus3bank_filepath)
-            copy_file(nus3bank_filepath, dst_nus3bank_filepath)
+                current_status.set_description_str("Converting sound files...")
+                nus3bank_filepath, duration = convert_sound(song_acb, song_preview, song_id)
+                nus3bank_filename = os.path.basename(nus3bank_filepath)
+                dst_nus3bank_filepath = os.path.join(outputs_sound_path, nus3bank_filename)
+                if os.path.exists(dst_nus3bank_filepath):
+                    os.remove(dst_nus3bank_filepath)
+                copy_file(nus3bank_filepath, dst_nus3bank_filepath)
 
-            outputs_fumen_song_path = os.path.join(outputs_fumen_path, song_id)
-            make_dir(outputs_fumen_song_path)
-            has_ura = False
-            for fumen_filepath in fumen_filepaths:
-                fumen_filename = os.path.basename(fumen_filepath)
-                dst_fumen_filepath = os.path.join(outputs_fumen_song_path, fumen_filename)
-                copy_file(fumen_filepath, dst_fumen_filepath)
-                tja_data = process_fumen(fumen_filepath, tja_data)
-                if fumen_filepath.endswith("_x.bin"):
-                    has_ura = True
-            if not has_ura:
-                course_data_list = tja_data["course_data"]
-                idx = 0
-                for course_data in course_data_list:
-                    if course_data["COURSE"] == "Edit":
-                        idx = course_data_list.index(course_data)
-                        break
-                course_data_list.pop(idx)
+                outputs_fumen_song_path = os.path.join(outputs_fumen_path, song_id)
+                make_dir(outputs_fumen_song_path)
+                has_ura = False
+                for fumen_filepath in fumen_filepaths:
+                    fumen_filename = os.path.basename(fumen_filepath)
+                    dst_fumen_filepath = os.path.join(outputs_fumen_song_path, fumen_filename)
+                    copy_file(fumen_filepath, dst_fumen_filepath)
+                    tja_data = process_fumen(fumen_filepath, tja_data)
+                    if fumen_filepath.endswith("_x.bin"):
+                        has_ura = True
+                if not has_ura:
+                    course_data_list = tja_data["course_data"]
+                    idx = 0
+                    for course_data in course_data_list:
+                        if course_data["COURSE"] == "Edit":
+                            idx = course_data_list.index(course_data)
+                            break
+                    course_data_list.pop(idx)
+                    tja_data["course_data"] = course_data_list
 
-            generate_datatable(tja_data, unique_id, duration)
+                generate_datatable(tja_data, unique_id, duration)
 
-            os.chdir(root_path)
-            remove_dir(temp_song_path)
-            retry = 0
+                os.chdir(root_path)
+                remove_dir(temp_song_path)
+                retry = 0
+            except Exception as e:
+                print(e)
+                retry += 1
     remove_dir(temp_path)
     t.close()
     current_song.close()

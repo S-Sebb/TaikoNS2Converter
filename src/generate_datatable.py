@@ -128,7 +128,6 @@ def process_fumen(fumen_filepath, tja_data):
     total_renda_duration = 0
     for j in range(1, 13):
         note_type_count[j] = 0
-    print(fumen_filepath)
     while start_pos < len(hex_data):
         note_type_start = start_pos
         note_type_end = note_type_start + note_type_length
