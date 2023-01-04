@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import os.path
 import wave
-from pydub import AudioSegment, effects
+
+from pydub import AudioSegment
 
 from utils import *
 
@@ -12,17 +13,13 @@ def convert_sound(acb_filepath, preview_filepath, song_id):
 
     template_nus3bank_data = get_nu3bank_template()
 
-    has_preview = preview_filepath != ""
-
-    if has_preview:
-        preview_wav_filepath = acb2wav(preview_filepath)
-        with wave.open(wav_filepath) as f:
-            preview_time = f.getnframes() / f.getframerate() + 10
-        appended_wav = AudioSegment.from_wav(wav_filepath) + AudioSegment.silent(10 * 1000)
-        appended_wav += AudioSegment.from_wav(preview_wav_filepath)
-        appended_wav.export(wav_filepath, format="wav")
-    else:
-        preview_time = 0
+    preview_wav_filepath = acb2wav(preview_filepath)
+    with wave.open(wav_filepath) as f:
+        duration = f.getnframes() / f.getframerate()
+        preview_time = duration + 10
+    appended_wav = AudioSegment.from_wav(wav_filepath) + AudioSegment.silent(10 * 1000)
+    appended_wav += AudioSegment.from_wav(preview_wav_filepath)
+    appended_wav.export(wav_filepath, format="wav")
 
     wav2idsp(wav_filepath, idsp_filepath)
     file_size = os.path.getsize(idsp_filepath)
@@ -53,7 +50,7 @@ def convert_sound(acb_filepath, preview_filepath, song_id):
     # Save nus3bank
     nus3bank_filepath = os.path.join(find_cur_dir(), "song_" + song_id + ".nus3bank")
     save_hex(nus3bank_filepath, template_nus3bank_data)
-    return nus3bank_filepath, has_preview
+    return nus3bank_filepath, duration
 
 
 def acb2wav(byte_filepath):

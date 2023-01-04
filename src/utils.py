@@ -13,7 +13,7 @@ root_path = src_path.parent.absolute()
 XOR_tool_path = os.path.join(root_path, "tools", "TNS2-XOR", "TNS2-XOR.exe")
 inputs_path = os.path.join(root_path, "inputs")
 musicinfo_path = os.path.join(inputs_path, "musicinfo")
-inputs_tja_path = os.path.join(inputs_path, "tja")
+conversion_data_path = os.path.join(inputs_path, "conversion_data.xlsx")
 outputs_path = os.path.join(root_path, "outputs")
 tools_path = os.path.join(root_path, "tools")
 outputs_fumen_path = os.path.join(outputs_path, "fumen")
@@ -21,7 +21,8 @@ outputs_sound_path = os.path.join(outputs_path, "sound")
 outputs_datatable_path = os.path.join(outputs_path, "datatable")
 template_path = os.path.join(src_path, "template.json")
 temp_path = os.path.join(root_path, "temp")
-JKSV_path = os.path.join(inputs_path, "JKSV")
+base_game_path = os.path.join(inputs_path, "base_game")
+encrypted_path = os.path.join(inputs_path, "encrypted")
 decrypted_path = os.path.join(inputs_path, "decrypted")
 extracted_path = os.path.join(inputs_path, "extracted")
 acb2hcas_path = os.path.join(tools_path, "libcgss", "bin", "x64", "Release", "acb2hcas.exe")
@@ -106,7 +107,7 @@ def decrypt_file(filepath):
 def init():
     for path in [temp_path, outputs_datatable_path]:
         remove_dir(path)
-    for path in [inputs_path, inputs_tja_path, outputs_path, JKSV_path, decrypted_path, extracted_path, tools_path,
+    for path in [inputs_path, outputs_path, encrypted_path, decrypted_path, extracted_path, tools_path,
                  temp_path, outputs_fumen_path, outputs_sound_path, outputs_datatable_path]:
         make_dir(path)
     if not os.path.exists(XOR_tool_path):
@@ -143,6 +144,13 @@ def init():
         print("musicinfo file not found.\n"
               "Please extract it from your latest musicinfo.bin and make sure the file \"musicinfo\" is at" +
               musicinfo_path)
+        input("Press Enter to exit...")
+        exit()
+    if not os.path.exists(conversion_data_path):
+        print("conversion_data file not found.\n"
+              "Please re-download it from this repo and fill in the data for the songs you wish to convert,\n"
+              "and make sure the file \"conversion_data.xlsx\" is at" +
+              conversion_data_path)
         input("Press Enter to exit...")
         exit()
 
@@ -196,3 +204,19 @@ def str2hex(input_str):
 def int2hex(input_int, hex_len):
     hex_data = struct.pack('<Q', input_int).hex()[:hex_len]
     return hex_data
+
+
+def hex2int(input_hex: str) -> int:
+    hex_data = bytearray.fromhex(input_hex)
+    if len(hex_data) == 4:
+        output = struct.unpack('<L', hex_data)[0]
+    elif len(hex_data) == 2:
+        output = struct.unpack('<H', hex_data)[0]
+    else:
+        output = 0
+    return output
+
+def hex2float(input_hex: str) -> float:
+    hex_data = bytearray.fromhex(input_hex)
+    output = struct.unpack('<f', hex_data)[0]
+    return output
