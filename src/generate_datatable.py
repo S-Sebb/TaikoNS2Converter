@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import math
 
-from parse_tja import *
+from utils import *
 
 
 def generate_datatable(tja_data, unique_id, duration):
@@ -128,28 +128,8 @@ def process_fumen(fumen_filepath, tja_data):
     total_renda_duration = 0
     for j in range(1, 14):
         note_type_count[j] = 0
-    while start_pos < len(hex_data):
-        note_type_start = start_pos
-        note_type_end = note_type_start + note_type_length
-        note_type = hex2int(hex_data[note_type_start:note_type_end])
-
-        scoreinit_start = start_pos + 16 * 2
-        scoreinit_end = scoreinit_start + scoreinit_length
-        scoreinit = hex2int(hex_data[scoreinit_start:scoreinit_end])
-
-        while note_type == 0:
-            # Jump to next note
-            while hex_data[start_pos:start_pos + 4 * 2] != "ffffffff":
-                if start_pos >= len(hex_data):
-                    break
-                start_pos += 4 * 2
-            while hex_data[start_pos:start_pos + 4 * 2] == "ffffffff":
-                if start_pos >= len(hex_data):
-                    break
-                start_pos += 4 * 2
-            start_pos += 12 * 2
-            if start_pos >= len(hex_data):
-                break
+    try:
+        while start_pos < len(hex_data):
             note_type_start = start_pos
             note_type_end = note_type_start + note_type_length
             note_type = hex2int(hex_data[note_type_start:note_type_end])
@@ -157,27 +137,52 @@ def process_fumen(fumen_filepath, tja_data):
             scoreinit_start = start_pos + 16 * 2
             scoreinit_end = scoreinit_start + scoreinit_length
             scoreinit = hex2int(hex_data[scoreinit_start:scoreinit_end])
-        if note_type != 0:
-            is_renda = False
-            if note_type == 10 or 12 or 13:
-                if scoreinit < 300:
-                    total_balloon += scoreinit
-                else:
-                    is_renda = True
-            if note_type == 6 or note_type == 9 or is_renda:
-                renda_duration_start = start_pos + 20 * 2
-                renda_duration_end = renda_duration_start + 4 * 2
-                renda_duration = hex2float(hex_data[renda_duration_start:renda_duration_end])
-                total_renda_duration += renda_duration
-            note_type_count[note_type] += 1
-        start_pos += note_data_length
 
-    total_renda_duration /= 1000
-    note_sum = 0
-    for j in [1, 2, 3, 4, 5, 7, 8]:
-        note_sum += note_type_count[j]
-    scoreinit = math.ceil(((1000000 - total_balloon * 100 - total_renda_duration * 17 * 100) / note_sum) / 10) * 10
-    score_max = round((total_renda_duration * 17 * 100 + note_sum * scoreinit + total_balloon * 100) / 10) * 10
+            while note_type == 0:
+                # Jump to next note
+                while hex_data[start_pos:start_pos + 4 * 2] != "ffffffff":
+                    if start_pos >= len(hex_data):
+                        break
+                    start_pos += 4 * 2
+                while hex_data[start_pos:start_pos + 4 * 2] == "ffffffff":
+                    if start_pos >= len(hex_data):
+                        break
+                    start_pos += 4 * 2
+                start_pos += 12 * 2
+                if start_pos >= len(hex_data):
+                    break
+                note_type_start = start_pos
+                note_type_end = note_type_start + note_type_length
+                note_type = hex2int(hex_data[note_type_start:note_type_end])
+
+                scoreinit_start = start_pos + 16 * 2
+                scoreinit_end = scoreinit_start + scoreinit_length
+                scoreinit = hex2int(hex_data[scoreinit_start:scoreinit_end])
+            if note_type != 0:
+                is_renda = False
+                if note_type == 10 or 12 or 13:
+                    if scoreinit < 300:
+                        total_balloon += scoreinit
+                    else:
+                        is_renda = True
+                if note_type == 6 or note_type == 9 or is_renda:
+                    renda_duration_start = start_pos + 20 * 2
+                    renda_duration_end = renda_duration_start + 4 * 2
+                    renda_duration = hex2float(hex_data[renda_duration_start:renda_duration_end])
+                    total_renda_duration += renda_duration
+                note_type_count[note_type] += 1
+            start_pos += note_data_length
+
+        total_renda_duration /= 1000
+        note_sum = 0
+        for j in [1, 2, 3, 4, 5, 7, 8]:
+            note_sum += note_type_count[j]
+        scoreinit = math.ceil(((1000000 - total_balloon * 100 - total_renda_duration * 17 * 100) / note_sum) / 10) * 10
+        score_max = round((total_renda_duration * 17 * 100 + note_sum * scoreinit + total_balloon * 100) / 10) * 10
+    except Exception as e:
+        print("Branching detected in fumen file: %s, using scoreinit 999 and score 999999" % fumen_filepath)
+        scoreinit = 999
+        score_max = 999999
     course_data_list.append({"COURSE": course, "LEVEL": level, "SCOREINIT": str(scoreinit),
                              "SCOREDIFF": str(score_max)})
     tja_data["course_data"] = course_data_list
