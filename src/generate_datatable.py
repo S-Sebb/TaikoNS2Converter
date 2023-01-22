@@ -18,18 +18,18 @@ def generate_datatable(tja_data, unique_id, duration):
     else:
         music_info_genre = music_order_genre
 
-    music_order_genre = int(music_order_genre)
-    music_info_genre = int(music_info_genre)
+    if music_order_genre != "nan":
+        music_order_genre = int(float(music_order_genre))
+    if music_info_genre != "nan":
+        music_info_genre = int(float(music_info_genre))
 
     course_data_list = tja_data["course_data"]
     course_sequence = {"Edit": 4, "Oni": 3, "Hard": 2, "Normal": 1, "Easy": 0}
     course_data_list.sort(key=lambda x: course_sequence[x["COURSE"]])
     if len(course_data_list) == 5:
         has_ura = True
-        ura_flag = "true"
     else:
         has_ura = False
-        ura_flag = "false"
 
     inits = []
     diffs = []
@@ -57,7 +57,7 @@ def generate_datatable(tja_data, unique_id, duration):
                                                  inits[0], inits[1], inits[2], inits[3], inits[4],
                                                  diffs[0], diffs[1], diffs[2], diffs[3], diffs[4],
                                                  diffs[0], diffs[1], diffs[2], diffs[3], diffs[4])
-    music_attribute_data = get_music_attribute_template() % (song_id, unique_id, ura_flag)
+    music_attribute_data = get_music_attribute_template() % (song_id, unique_id, has_ura)
     wordlist_data = get_wordlist_template() % (song_id, title, song_id, subtitle, song_id)
     music_ai_section_data = get_music_ai_section_template() % (song_id, unique_id, music_ai_section_num,
                                                                music_ai_section_num, music_ai_section_num,

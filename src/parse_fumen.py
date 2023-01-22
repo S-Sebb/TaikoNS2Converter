@@ -73,12 +73,20 @@ def parse_fumen(fumen_filepath, tja_data):
         note_sum = 0
         for j in [1, 2, 3, 4, 5, 7, 8]:
             note_sum += note_type_count[j]
-        scoreinit = math.ceil(
-            ((1000000 - total_balloon_hit_count * 100 - total_renda_duration * 17.5 * 100) / note_sum) / 10) * 10
-        score_max = round(
-            (total_renda_duration * 17.5 * 100 + note_sum * scoreinit + total_balloon_hit_count * 100) / 10) * 10
+        if course == "Edit" or course == "Oni":
+            renda_per_sec = 17
+        elif course == "Hard":
+            renda_per_sec = 11
+        elif course == "Normal":
+            renda_per_sec = 8
+        else:
+            renda_per_sec = 6
+        scoreinit = math.ceil(((1000000 - total_balloon_hit_count * 100 -
+                                total_renda_duration * renda_per_sec * 100) / note_sum) / 10) * 10
+        score_max = round((total_renda_duration * renda_per_sec * 100 +
+                           note_sum * scoreinit + total_balloon_hit_count * 100) / 10) * 10
     except Exception as e:
-        print("Error: %s" % e)
+        print("\n")
         print("Branching detected in fumen file: %s, using default score info" % fumen_filepath)
         scoreinit = "nan"
         score_max = "nan"
