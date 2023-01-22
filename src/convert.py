@@ -4,7 +4,8 @@ from tqdm import tqdm
 
 from convert_fumen import convert_fumen
 from convert_sound import convert_sound
-from generate_datatable import process_fumen, generate_datatable
+from generate_datatable import generate_datatable
+from parse_fumen import parse_fumen
 from utils import *
 
 if __name__ == '__main__':
@@ -197,7 +198,7 @@ if __name__ == '__main__':
             fumen_filename = os.path.basename(fumen_filepath)
             dst_fumen_filepath = os.path.join(outputs_fumen_song_path, fumen_filename)
             copy_file(fumen_filepath, dst_fumen_filepath)
-            tja_data = process_fumen(fumen_filepath, tja_data)
+            tja_data = parse_fumen(fumen_filepath, tja_data)
             if fumen_filepath.endswith("_x.bin"):
                 has_ura = True
         if not has_ura:
@@ -211,7 +212,6 @@ if __name__ == '__main__':
             tja_data["course_data"] = course_data_list
 
         generate_datatable(tja_data, unique_id, duration)
-
         os.chdir(root_path)
         remove_dir(temp_song_path)
         retry = 0
