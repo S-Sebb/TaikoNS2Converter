@@ -18,6 +18,9 @@ def generate_datatable(tja_data, unique_id, duration):
     else:
         music_info_genre = music_order_genre
 
+    music_order_genre = int(music_order_genre)
+    music_info_genre = int(music_info_genre)
+
     course_data_list = tja_data["course_data"]
     course_sequence = {"Edit": 4, "Oni": 3, "Hard": 2, "Normal": 1, "Easy": 0}
     course_data_list.sort(key=lambda x: course_sequence[x["COURSE"]])
