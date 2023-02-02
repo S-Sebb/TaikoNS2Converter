@@ -28,8 +28,10 @@ def generate_datatable(tja_data, unique_id, duration):
     course_data_list.sort(key=lambda x: course_sequence[x["COURSE"]])
     if len(course_data_list) == 5:
         has_ura = True
+        ura_flag = "true"
     else:
         has_ura = False
+        ura_flag = "false"
 
     inits = []
     diffs = []
@@ -57,7 +59,7 @@ def generate_datatable(tja_data, unique_id, duration):
                                                  inits[0], inits[1], inits[2], inits[3], inits[4],
                                                  diffs[0], diffs[1], diffs[2], diffs[3], diffs[4],
                                                  diffs[0], diffs[1], diffs[2], diffs[3], diffs[4])
-    music_attribute_data = get_music_attribute_template() % (song_id, unique_id, has_ura)
+    music_attribute_data = get_music_attribute_template() % (song_id, unique_id, ura_flag)
     wordlist_data = get_wordlist_template() % (song_id, title, song_id, subtitle, song_id)
     music_ai_section_data = get_music_ai_section_template() % (song_id, unique_id, music_ai_section_num,
                                                                music_ai_section_num, music_ai_section_num,
