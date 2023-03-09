@@ -220,4 +220,6 @@ if __name__ == '__main__':
     t.close()
     current_song.close()
     current_status.close()
-    print("Complete")
+    print("Complete\n")
+    print("Available unique ids: " + str(available_unique_ids) + "\n")
+    print("Number of available unique ids: " + str(len(available_unique_ids)) + "\n")

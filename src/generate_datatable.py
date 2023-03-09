@@ -41,7 +41,10 @@ def generate_datatable(tja_data, unique_id, duration):
         score_diff = course_data["SCOREDIFF"]
         inits.append(score_init)
         diffs.append(score_diff)
-        levels.append(course_data["LEVEL"])
+        if course_data["LEVEL"] != "nan":
+            levels.append(int(course_data["LEVEL"]))
+        else:
+            levels.append(0)
 
     if not has_ura:
         inits.append("1000")

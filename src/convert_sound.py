@@ -16,8 +16,8 @@ def convert_sound(acb_filepath, preview_filepath, song_id):
     preview_wav_filepath = acb2wav(preview_filepath)
     with wave.open(wav_filepath) as f:
         duration = f.getnframes() / f.getframerate()
-        preview_time = duration + 20
-    appended_wav = AudioSegment.from_wav(wav_filepath) + AudioSegment.silent(20 * 1000)
+        preview_time = duration + 10
+    appended_wav = AudioSegment.from_wav(wav_filepath) + AudioSegment.silent(10 * 1000)
     appended_wav += AudioSegment.from_wav(preview_wav_filepath)
     appended_wav.export(wav_filepath, format="wav")
 
