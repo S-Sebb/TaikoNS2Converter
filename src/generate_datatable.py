@@ -5,6 +5,10 @@ from utils import *
 def generate_datatable(tja_data, unique_id, duration):
     title = tja_data["TITLE"]
     subtitle = tja_data["SUBTITLE"]
+    if title == "nan":
+        title = ""
+    if subtitle == "nan":
+        subtitle = ""
 
     music_order_genre = tja_data["genre"]
     if music_order_genre == "7":
@@ -49,7 +53,7 @@ def generate_datatable(tja_data, unique_id, duration):
     if not has_ura:
         inits.append("1000")
         diffs.append("10000")
-        levels.append("0")
+        levels.append(0)
 
     song_id = tja_data["song_id"]
 

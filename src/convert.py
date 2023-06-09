@@ -129,6 +129,11 @@ if __name__ == '__main__':
         easy_data["SCOREINIT"] = conversion_data["EASY_SCOREINIT"][ind]
         easy_data["SCOREDIFF"] = conversion_data["EASY_MAX_SCORE"][ind]
         course_data_list = [edit_data, oni_data, hard_data, normal_data, easy_data]
+        for i, course_data in enumerate(course_data_list):
+            if course_data["LEVEL"] == "nan":
+                course_data["LEVEL"] = 0
+            else:
+                course_data["LEVEL"] = int(float(course_data["LEVEL"]))
         tja_data["course_data"] = course_data_list
         tja_data_list.append(tja_data)
 

@@ -54,10 +54,13 @@ def parse_fumen(fumen_filepath, tja_data):
             note_type = hex2int(hex_data[note_type_start:note_type_end])
             is_renda = False
             if note_type == 10 or 12:
-                balloon_hit_count = hex2int(hex_data[start_pos + 20 * 2: start_pos + 24 * 2])
+                if note_type == 10:
+                    balloon_hit_count = hex2int(hex_data[start_pos + 16 * 2: start_pos + 20 * 2])
+                else:
+                    balloon_hit_count = hex2int(hex_data[start_pos + 20 * 2: start_pos + 24 * 2])
                 if balloon_hit_count < 300:
                     total_balloon_hit_count += balloon_hit_count
-                else:
+                elif balloon_hit_count < 1000:
                     is_renda = True
             elif note_type == 6 or note_type == 9:
                 is_renda = True
