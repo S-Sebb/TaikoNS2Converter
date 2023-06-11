@@ -3,8 +3,18 @@ import os.path
 import wave
 
 from pydub import AudioSegment
-
+import librosa
 from utils import *
+from scipy import signal
+
+
+def find_offset(main_file, preview_file):
+    # find offset of preview_file within main_file audio
+    preview_sound, sr_preview_sound = librosa.load(preview_file, sr=None)
+    main_sound, sr_main_sound = librosa.load(main_file, sr=sr_preview_sound)
+    corr = signal.correlate(main_sound, preview_sound, mode='valid', method="fft")
+    offset = corr.argmax() / sr_preview_sound
+    return offset
 
 
 def convert_sound(acb_filepath, preview_filepath, song_id):
@@ -16,9 +26,8 @@ def convert_sound(acb_filepath, preview_filepath, song_id):
     preview_wav_filepath = acb2wav(preview_filepath)
     with wave.open(wav_filepath) as f:
         duration = f.getnframes() / f.getframerate()
-        preview_time = duration + 10
-    appended_wav = AudioSegment.from_wav(wav_filepath) + AudioSegment.silent(10 * 1000)
-    appended_wav += AudioSegment.from_wav(preview_wav_filepath)
+    preview_time = find_offset(wav_filepath, preview_wav_filepath)
+    appended_wav = AudioSegment.from_wav(wav_filepath)
     appended_wav.export(wav_filepath, format="wav")
 
     wav2idsp(wav_filepath, idsp_filepath)
@@ -30,6 +39,7 @@ def convert_sound(acb_filepath, preview_filepath, song_id):
     template_nus3bank_data = template_nus3bank_data.replace("aaaa", unique_id)
 
     # Replace preview time
+    print("Preview_time:%s" % preview_time)
     preview_time = int(preview_time * 1000)
     preview_time = int2hex(preview_time, 8)
     template_nus3bank_data = template_nus3bank_data.replace("bbbbbbbb", preview_time)
