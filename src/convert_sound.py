@@ -39,7 +39,6 @@ def convert_sound(acb_filepath, preview_filepath, song_id):
     template_nus3bank_data = template_nus3bank_data.replace("aaaa", unique_id)
 
     # Replace preview time
-    print("Preview_time:%s" % preview_time)
     preview_time = int(preview_time * 1000)
     preview_time = int2hex(preview_time, 8)
     template_nus3bank_data = template_nus3bank_data.replace("bbbbbbbb", preview_time)
