@@ -1,6 +1,4 @@
-decrypted/
-extracted/
-encrypted/
-musicinfo
-musicinfo.bin
-base_game/
+# Ignore everything in this directory
+*
+# Except this file
+!.gitignore
