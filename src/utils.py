@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import binascii
+import collections
+import gzip
 import json
 import os
 import shutil
@@ -18,7 +20,8 @@ outputs_path = os.path.join(root_path, "outputs")
 tools_path = os.path.join(root_path, "tools")
 outputs_fumen_path = os.path.join(outputs_path, "fumen")
 outputs_sound_path = os.path.join(outputs_path, "sound")
-outputs_datatable_path = os.path.join(outputs_path, "datatable")
+input_datatable_path = os.path.join(inputs_path, "datatable")
+output_datatable_path = os.path.join(outputs_path, "datatable")
 template_path = os.path.join(src_path, "template.json")
 temp_path = os.path.join(root_path, "temp")
 base_game_path = os.path.join(inputs_path, "base_game")
@@ -30,6 +33,15 @@ vgmstream_path = os.path.join(tools_path, "vgmstream-win", "test.exe")
 vgaudiocli_path = os.path.join(tools_path, "VGAudioCli", "VGAudioCli.exe")
 ns2_key_a = "52539816150204134"
 ns2_key_k = "00baa8af36327ee6"
+music_ai_section_filename = "music_ai_section.bin"
+music_attribute_filename = "music_attribute.bin"
+music_order_filename = "music_order.bin"
+musicinfo_filename = "musicinfo.bin"
+wordlist_filename = "wordlist.bin"
+datatable_filenames = [music_ai_section_filename, music_attribute_filename, music_order_filename, musicinfo_filename,
+                       wordlist_filename]
+input_datatable_filepaths = [os.path.join(input_datatable_path, filename) for filename in datatable_filenames]
+output_datatable_filepaths = [os.path.join(output_datatable_path, filename) for filename in datatable_filenames]
 
 
 def read_json(json_path):
@@ -73,6 +85,27 @@ def get_musicinfo_data() -> list:
     return musicinfo_data
 
 
+def get_datatable_files() -> list:
+    data_list = []
+    for filepath in input_datatable_filepaths:
+        try:
+            with open(filepath, "rb") as f:
+                json_data = json.loads(gzip.decompress(f.read()).decode("utf-8"))["items"]
+            data_list.append(json_data)
+        except Exception as e:
+            print("Error found in %s" % filepath)
+            print(e)
+            exit()
+    return data_list
+
+
+def write_datatable_files(data_list: tuple) -> None:
+    for filepath, data in zip(output_datatable_filepaths, data_list):
+        with open(filepath, "wb") as f:
+            f.write(gzip.compress(
+                json.dumps({"items": data}, sort_keys=False, indent="\t", ensure_ascii=False).encode("utf-8")))
+
+
 def find_cur_dir():
     return os.getcwd()
 
@@ -105,10 +138,10 @@ def decrypt_file(filepath):
 
 
 def init():
-    for path in [temp_path, outputs_datatable_path]:
+    for path in [temp_path, output_datatable_path]:
         remove_dir(path)
     for path in [inputs_path, outputs_path, encrypted_path, decrypted_path, extracted_path, tools_path,
-                 temp_path, outputs_fumen_path, outputs_sound_path, outputs_datatable_path]:
+                 temp_path, outputs_fumen_path, outputs_sound_path, output_datatable_path]:
         make_dir(path)
     if not os.path.exists(XOR_tool_path):
         print("TNS2-XOR.exe not found.\n"
@@ -140,12 +173,6 @@ def init():
               "Please re-download this repository and make sure template.json is at " + template_path)
         input("\nPress Enter to exit...")
         exit()
-    if not os.path.exists(musicinfo_path):
-        print("musicinfo file not found.\n"
-              "Please extract it from your latest musicinfo.bin and make sure the file \"musicinfo\" is at" +
-              musicinfo_path)
-        input("Press Enter to exit...")
-        exit()
     if not os.path.exists(conversion_data_path):
         print("conversion_data file not found.\n"
               "Please re-download it from this repo and fill in the data for the songs you wish to convert,\n"
@@ -153,6 +180,11 @@ def init():
               conversion_data_path)
         input("Press Enter to exit...")
         exit()
+    for filepath in input_datatable_filepaths:
+        if not os.path.exists(filepath):
+            print("%s" % filepath + " not found.\n")
+            input("Press Enter to exit...")
+            exit()
 
 
 def acb2hcas(acb_filepath):
@@ -216,7 +248,147 @@ def hex2int(input_hex: str) -> int:
         output = 0
     return output
 
+
 def hex2float(input_hex: str) -> float:
     hex_data = bytearray.fromhex(input_hex)
     output = struct.unpack('<f', hex_data)[0]
     return output
+
+
+def sort_datatable_key_sequence(data_list: tuple) -> tuple:
+    music_ai_section_key_sequence = {"id": 0,
+                                     "uniqueId": 1,
+                                     "easy": 2,
+                                     "normal": 3,
+                                     "hard": 4,
+                                     "oni": 5,
+                                     "ura": 6}
+    music_attribute_key_sequence = {"id": 0,
+                                    "uniqueId": 1,
+                                    "new": 2,
+                                    "canPlayUra": 3,
+                                    "doublePlay": 4,
+                                    "tag1": 5,
+                                    "tag2": 6,
+                                    "tag3": 7,
+                                    "tag4": 8,
+                                    "tag5": 9,
+                                    "tag6": 10,
+                                    "tag7": 11,
+                                    "tag8": 12,
+                                    "tag9": 13,
+                                    "tag10": 14,
+                                    "donBg1p": 15,
+                                    "donBg2p": 16,
+                                    "dancerDai": 17,
+                                    "dancer": 18,
+                                    "danceNormalBg": 19,
+                                    "danceFeverBg": 20,
+                                    "rendaEffect": 21,
+                                    "fever": 22,
+                                    "donBg1p1": 23,
+                                    "donBg2p1": 24,
+                                    "dancerDai1": 25,
+                                    "dancer1": 26,
+                                    "danceNormalBg1": 27,
+                                    "danceFeverBg1": 28,
+                                    "rendaEffect1": 29,
+                                    "fever1": 30}
+    music_order_key_sequence = {"genreNo": 0,
+                                "id": 1,
+                                "uniqueId": 2,
+                                "closeDispType": 3}
+    musicinfo_key_sequence = {"id": 0,
+                              "uniqueId": 1,
+                              "genreNo": 2,
+                              "songFileName": 3,
+                              "papamama": 4,
+                              "branchEasy": 5,
+                              "branchNormal": 6,
+                              "branchHard": 7,
+                              "branchMania": 8,
+                              "branchUra": 9,
+                              "starEasy": 10,
+                              "starNormal": 11,
+                              "starHard": 12,
+                              "starMania": 13,
+                              "starUra": 14,
+                              "shinutiEasy": 15,
+                              "shinutiNormal": 16,
+                              "shinutiHard": 17,
+                              "shinutiMania": 18,
+                              "shinutiUra": 19,
+                              "shinutiEasyDuet": 20,
+                              "shinutiNormalDuet": 21,
+                              "shinutiHardDuet": 22,
+                              "shinutiManiaDuet": 23,
+                              "shinutiUraDuet": 24,
+                              "shinutiScoreEasy": 25,
+                              "shinutiScoreNormal": 26,
+                              "shinutiScoreHard": 27,
+                              "shinutiScoreMania": 28,
+                              "shinutiScoreUra": 29,
+                              "shinutiScoreEasyDuet": 30,
+                              "shinutiScoreNormalDuet": 31,
+                              "shinutiScoreHardDuet": 32,
+                              "shinutiScoreManiaDuet": 33,
+                              "shinutiScoreUraDuet": 34,
+                              "easyOnpuNum": 35,
+                              "normalOnpuNum": 36,
+                              "hardOnpuNum": 37,
+                              "maniaOnpuNum": 38,
+                              "uraOnpuNum": 39,
+                              "fuusenTotalEasy": 40,
+                              "fuusenTotalNormal": 41,
+                              "fuusenTotalHard": 42,
+                              "fuusenTotalMania": 43,
+                              "fuusenTotalUra": 44,
+                              "rendaTimeEasy": 45,
+                              "rendaTimeNormal": 46,
+                              "rendaTimeHard": 47,
+                              "rendaTimeMania": 48,
+                              "rendaTimeUra": 49}
+    wordlist_key_sequence = {"key": 0,
+                             "japaneseText": 1,
+                             "japaneseFontType": 2,
+                             "englishUsText": 3,
+                             "englishUsFontType": 4,
+                             "chineseTText": 5,
+                             "chineseTFontType": 6,
+                             "koreanText": 7,
+                             "koreanFontType": 8,
+                             "frenchText": 9,
+                             "frenchFontType": 10}
+
+    music_ai_section_list, music_attribute_list, music_order_list, musicinfo_list, wordlist_list = data_list
+
+    for i, music_ai_section in enumerate(music_ai_section_list):
+        music_ai_section = collections.OrderedDict(sorted(music_ai_section.items(),
+                                                          key=lambda x: music_ai_section_key_sequence[x[0]]))
+        music_ai_section_list[i] = music_ai_section
+    for i, music_attribute in enumerate(music_attribute_list):
+        # music_attribute["new"] = False
+        music_attribute = collections.OrderedDict(sorted(music_attribute.items(),
+                                                         key=lambda x: music_attribute_key_sequence[x[0]]))
+        music_attribute_list[i] = music_attribute
+    for i, music_order in enumerate(music_order_list):
+        music_order = collections.OrderedDict(sorted(music_order.items(),
+                                                     key=lambda x: music_order_key_sequence[x[0]]))
+        music_order_list[i] = music_order
+    for i, musicinfo in enumerate(musicinfo_list):
+        if musicinfo["genreNo"] == 7:
+            musicinfo["genreNo"] = 4
+        elif musicinfo["genreNo"] == 8:
+            musicinfo["genreNo"] = 5
+        elif musicinfo["genreNo"] == 17:
+            musicinfo["genreNo"] = 4
+        elif musicinfo["genreNo"] == 18:
+            musicinfo["genreNo"] = 0
+        musicinfo = collections.OrderedDict(sorted(musicinfo.items(),
+                                                   key=lambda x: musicinfo_key_sequence[x[0]]))
+        musicinfo_list[i] = musicinfo
+    for i, wordlist in enumerate(wordlist_list):
+        wordlist = collections.OrderedDict(sorted(wordlist.items(),
+                                                  key=lambda x: wordlist_key_sequence[x[0]]))
+        wordlist_list[i] = wordlist
+    return music_ai_section_list, music_attribute_list, music_order_list, musicinfo_list, wordlist_list

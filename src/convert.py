@@ -11,6 +11,8 @@ from utils import *
 if __name__ == '__main__':
     init()
 
+    music_ai_section_list, music_attribute_list, music_order_list, musicinfo_list, wordlist_list = get_datatable_files()
+
     song_dict_list = []
     fumen_bytes_endings = ["_e.bytes", "_e_1.bytes", "_e_2.bytes", "_n.bytes", "_n_1.bytes", "_n_2.bytes",
                            "_h.bytes", "_h_1.bytes", "_h_2.bytes", "_m.bytes", "_m_1.bytes", "_m_2.bytes",
@@ -152,10 +154,10 @@ if __name__ == '__main__':
                 continue
     tja_data_list = found_tja_data_list
 
-    musicinfo_data = get_musicinfo_data()
     available_unique_ids = [_ for _ in range(1599)]
-    for musicinfo in musicinfo_data:
-        available_unique_ids.remove(musicinfo["uniqueId"])
+    for musicinfo in musicinfo_list:
+        if musicinfo["uniqueId"] in available_unique_ids:
+            available_unique_ids.remove(musicinfo["uniqueId"])
     available_unique_ids = sorted(available_unique_ids)
 
     if len(available_unique_ids) < len(tja_data_list):
@@ -165,6 +167,7 @@ if __name__ == '__main__':
     t = tqdm(range(len(tja_data_list)), position=0, leave=False)
     current_song = tqdm(total=0, desc="Current song", position=1, bar_format='{desc}', leave=False)
     current_status = tqdm(total=0, desc="", position=2, bar_format='{desc}', leave=False)
+    append_data = []
     for i in t:
         tja_data = tja_data_list[i]
         song_id = tja_data["song_id"]
@@ -216,10 +219,27 @@ if __name__ == '__main__':
             course_data_list.pop(idx)
             tja_data["course_data"] = course_data_list
 
-        generate_datatable(tja_data, unique_id, duration)
+        append_data.append(generate_datatable(tja_data, unique_id, duration))
         os.chdir(root_path)
         remove_dir(temp_song_path)
         retry = 0
+
+    for data in append_data:
+        music_ai_section_list.append(data[0])
+        music_attribute_list.append(data[1])
+        music_order_list.insert(0, data[2])
+        musicinfo_list.append(data[3])
+        for wordlist_data in data[4]:
+            wordlist_list.append(wordlist_data)
+
+    music_order_list = sorted(music_order_list, key=lambda x: x["genreNo"])
+
+    music_ai_section_list, music_attribute_list, music_order_list, musicinfo_list, \
+        wordlist_list = sort_datatable_key_sequence((music_ai_section_list, music_attribute_list, music_order_list,
+                                                    musicinfo_list, wordlist_list))
+
+    write_datatable_files(
+        (music_ai_section_list, music_attribute_list, music_order_list, musicinfo_list, wordlist_list))
 
     remove_dir(temp_path)
     t.close()
