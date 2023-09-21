@@ -87,11 +87,11 @@ def parse_fumen(fumen_filepath, tja_data):
                            note_sum * scoreinit + total_balloon_hit_count * 100) / 10) * 10
     except Exception as e:
         print("\n")
-        print("Branching detected in fumen file: %s, using default score info" % fumen_filepath)
-        scoreinit = "nan"
-        score_max = "nan"
-    course_data_list.append({"COURSE": course, "LEVEL": level, "SCOREINIT": str(scoreinit),
-                             "SCOREDIFF": str(score_max)})
+        print("Branching detected in fumen file: %s, unsupported operation, exiting..." % fumen_filepath)
+        exit()
+    course_data_list.append({"COURSE": course, "LEVEL": level, "scoreinit": str(scoreinit),
+                             "score_max": str(score_max), "course_renda_duration": total_renda_duration,
+                             "course_note_count": note_sum, "course_balloon_count": total_balloon_hit_count})
     tja_data["course_data"] = course_data_list
 
     return tja_data

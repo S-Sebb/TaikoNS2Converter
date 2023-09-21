@@ -11,7 +11,18 @@ from utils import *
 if __name__ == '__main__':
     init()
 
-    music_ai_section_list, music_attribute_list, music_order_list, musicinfo_list, wordlist_list = get_datatable_files()
+    if get_datatable_exist():
+        (music_ai_section_list, music_attribute_list, music_order_list, musicinfo_list, wordlist_list,
+         music_usbsetting_list, reward_list, shougou_list) = get_datatable_files()
+        available_unique_ids = [_ for _ in range(1599)]
+        for musicinfo in musicinfo_list:
+            if musicinfo["uniqueId"] in available_unique_ids:
+                available_unique_ids.remove(musicinfo["uniqueId"])
+        available_unique_ids = sorted(available_unique_ids)
+        available_shougou_unique_ids = [_ for _ in range(1599)]
+        for shougou in shougou_list:
+            if shougou["uniqueId"] in available_shougou_unique_ids:
+                available_shougou_unique_ids.remove(shougou["uniqueId"])
 
     song_dict_list = []
     fumen_bytes_endings = ["_e.bytes", "_e_1.bytes", "_e_2.bytes", "_n.bytes", "_n_1.bytes", "_n_2.bytes",
@@ -136,6 +147,9 @@ if __name__ == '__main__':
                 course_data["LEVEL"] = 0
             else:
                 course_data["LEVEL"] = int(float(course_data["LEVEL"]))
+        tja_data["syougou"] = "[]"
+        tja_data["syougou_type"] = "[]"
+        tja_data["syougou_rarity"] = "[]"
         tja_data["course_data"] = course_data_list
         tja_data_list.append(tja_data)
 
@@ -154,15 +168,10 @@ if __name__ == '__main__':
                 continue
     tja_data_list = found_tja_data_list
 
-    available_unique_ids = [_ for _ in range(1599)]
-    for musicinfo in musicinfo_list:
-        if musicinfo["uniqueId"] in available_unique_ids:
-            available_unique_ids.remove(musicinfo["uniqueId"])
-    available_unique_ids = sorted(available_unique_ids)
-
-    if len(available_unique_ids) < len(tja_data_list):
-        print("Not enough unique ids. Please delete some songs from musicinfo.")
-        exit()
+    if get_datatable_exist():
+        if len(available_unique_ids) < len(tja_data_list):
+            print("Not enough unique ids. Please delete some songs from musicinfo.")
+            exit()
 
     t = tqdm(range(len(tja_data_list)), position=0, leave=False)
     current_song = tqdm(total=0, desc="Current song", position=1, bar_format='{desc}', leave=False)
@@ -176,7 +185,7 @@ if __name__ == '__main__':
             if data["id"] == song_id:
                 song_dict = data
                 break
-        unique_id = available_unique_ids.pop(0)
+
         current_song.set_description_str("Current song: " + song_id)
         song_fumens = song_dict["fumens"]
         song_acb = song_dict["acb"]
@@ -207,6 +216,10 @@ if __name__ == '__main__':
             dst_fumen_filepath = os.path.join(outputs_fumen_song_path, fumen_filename)
             copy_file(fumen_filepath, dst_fumen_filepath)
             tja_data = parse_fumen(fumen_filepath, tja_data)
+            fumen_data = open_as_hex(dst_fumen_filepath)
+            encrypted_fumen_data = encrypt_fumen_data(fumen_data)
+            with open(dst_fumen_filepath, "wb") as f:
+                f.write(encrypted_fumen_data)
             if fumen_filepath.endswith("_x.bin"):
                 has_ura = True
         if not has_ura:
@@ -219,32 +232,52 @@ if __name__ == '__main__':
             course_data_list.pop(idx)
             tja_data["course_data"] = course_data_list
 
-        append_data.append(generate_datatable(tja_data, unique_id, duration))
+        if get_datatable_exist():
+            unique_id = available_unique_ids.pop(0)
+            current_status.set_description_str("Generating datatable...")
+            (append_music_ai_section, append_music_attribute, append_music_order, append_music_usbsetting,
+             append_music_info, append_wordlist, append_reward, append_syougou,
+             available_syougou_unique_ids) = generate_datatable(
+                tja_data, unique_id, duration, available_shougou_unique_ids
+            )
+            append_data.append((append_music_ai_section, append_music_attribute, append_music_order,
+                                append_music_usbsetting, append_music_info, append_wordlist, append_reward,
+                                append_syougou))
         os.chdir(root_path)
         remove_dir(temp_song_path)
         retry = 0
 
-    for data in append_data:
-        music_ai_section_list.append(data[0])
-        music_attribute_list.append(data[1])
-        music_order_list.insert(0, data[2])
-        musicinfo_list.append(data[3])
-        for wordlist_data in data[4]:
-            wordlist_list.append(wordlist_data)
+    if get_datatable_exist():
+        for data in append_data:
+            music_ai_section_list.append(data[0])
+            music_attribute_list.append(data[1])
+            for music_order_data in data[2]:
+                music_order_list.append(music_order_data)
+            music_usbsetting_list.append(data[3])
+            musicinfo_list.append(data[4])
+            for wordlist_data in data[5]:
+                wordlist_list.append(wordlist_data)
+            for reward_data in data[6]:
+                reward_list.append(reward_data)
+            for shougou_data in data[7]:
+                shougou_list.append(shougou_data)
 
-    music_order_list = sorted(music_order_list, key=lambda x: x["genreNo"])
+        music_order_list = sorted(music_order_list, key=lambda x: x["genreNo"])
 
-    music_ai_section_list, music_attribute_list, music_order_list, musicinfo_list, \
-        wordlist_list = sort_datatable_key_sequence((music_ai_section_list, music_attribute_list, music_order_list,
-                                                    musicinfo_list, wordlist_list))
+        (music_ai_section_list, music_attribute_list, music_order_list, musicinfo_list, wordlist_list,
+         music_usbsetting_list, reward_list, shougou_list) = sort_datatable_key_sequence(
+            (music_ai_section_list, music_attribute_list, music_order_list, musicinfo_list, wordlist_list,
+             music_usbsetting_list, reward_list, shougou_list))
 
-    write_datatable_files(
-        (music_ai_section_list, music_attribute_list, music_order_list, musicinfo_list, wordlist_list))
+        write_datatable_files(
+            (music_ai_section_list, music_attribute_list, music_order_list, musicinfo_list, wordlist_list,
+             music_usbsetting_list, reward_list, shougou_list))
 
     remove_dir(temp_path)
     t.close()
     current_song.close()
     current_status.close()
     print("Complete\n")
-    print("Available unique ids: " + str(available_unique_ids) + "\n")
-    print("Number of available unique ids: " + str(len(available_unique_ids)) + "\n")
+    if get_datatable_exist():
+        print("Available unique ids: " + str(available_unique_ids) + "\n")
+        print("Number of available unique ids: " + str(len(available_unique_ids)) + "\n")
