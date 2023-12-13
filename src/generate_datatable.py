@@ -8,6 +8,8 @@ def generate_datatable(tja_data, unique_id, duration, available_syougou_unique_i
     subtitle = tja_data["SUBTITLE"]
 
     music_order_genre = tja_data["genre"]
+    if music_order_genre == "nan":
+        music_order_genre = "0"
     if music_order_genre == "17":
         music_info_genre = "4"
     else:

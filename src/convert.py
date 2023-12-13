@@ -14,12 +14,12 @@ if __name__ == '__main__':
     if get_datatable_exist():
         (music_ai_section_list, music_attribute_list, music_order_list, musicinfo_list, wordlist_list,
          music_usbsetting_list, reward_list, shougou_list) = get_datatable_files()
-        available_unique_ids = [_ for _ in range(1599)]
+        available_unique_ids = [_ for _ in range(1, 1599)]
         for musicinfo in musicinfo_list:
             if musicinfo["uniqueId"] in available_unique_ids:
                 available_unique_ids.remove(musicinfo["uniqueId"])
         available_unique_ids = sorted(available_unique_ids)
-        available_shougou_unique_ids = [_ for _ in range(1599)]
+        available_shougou_unique_ids = [_ for _ in range(1, 1599)]
         for shougou in shougou_list:
             if shougou["uniqueId"] in available_shougou_unique_ids:
                 available_shougou_unique_ids.remove(shougou["uniqueId"])
