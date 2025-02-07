@@ -198,6 +198,8 @@ def generate_datatable(tja_data, unique_id, duration, available_syougou_unique_i
             "englishUsFontType": 1,
             "chineseTText": title,
             "chineseTFontType": 2,
+            "koreanText": title,
+            "koreanFontType": 3,
             "chineseSText": title,
             "chineseSFontType": 4
         },
@@ -209,6 +211,8 @@ def generate_datatable(tja_data, unique_id, duration, available_syougou_unique_i
             "englishUsFontType": 1,
             "chineseTText": subtitle,
             "chineseTFontType": 2,
+            "koreanText": subtitle,
+            "koreanFontType": 3,
             "chineseSText": subtitle,
             "chineseSFontType": 4
         },
@@ -220,6 +224,8 @@ def generate_datatable(tja_data, unique_id, duration, available_syougou_unique_i
             "englishUsFontType": 1,
             "chineseTText": "",
             "chineseTFontType": 2,
+            "koreanText": "",
+            "koreanFontType": 3,
             "chineseSText": "",
             "chineseSFontType": 4
         }
@@ -246,8 +252,13 @@ def generate_datatable(tja_data, unique_id, duration, available_syougou_unique_i
             "songuid4": -1,
             "songuid5": -1,
             "songtag": "",
-            "tokenId": -1,
+            "tokenId1": -1,
+			"tokenId2": -1,
+			"tokenId3": -1,
+			"tokenId4": -1,
+			"tokenId5": -1,
             "qrId": -1,
+            "daniId": -1,
             "value": -1,
             "ensoType": -1,
             "reward_message": reward_message,
@@ -262,6 +273,8 @@ def generate_datatable(tja_data, unique_id, duration, available_syougou_unique_i
             "englishUsFontType": 0,
             "chineseTText": str(syougou),
             "chineseTFontType": 0,
+            "koreanText": str(syougou),
+            "koreanFontType": 0,
             "chineseSText": str(syougou),
             "chineseSFontType": 0
         }

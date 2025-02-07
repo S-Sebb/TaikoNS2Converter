@@ -50,8 +50,8 @@ datatable_exist = False
 fumen_key = "4434423946383537303842433443383030333843444132343339373531353830"
 datatable_key = "3530304242323633353537423431384139353134383346433246464231354534"
 openssl_path = os.path.join(tools_path, "OpenSSL")
-openssl_exe_path = os.path.join(openssl_path, "openssl.exe")
-
+# openssl_exe_path = os.path.join(openssl_path, "openssl.exe")
+openssl_exe_path = "openssl.exe"
 
 def read_json(json_path):
     with open(json_path) as f:
